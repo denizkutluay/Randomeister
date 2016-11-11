@@ -1,0 +1,26 @@
+<< KnotTheory`;
+
+Loading KnotTheory` version of September 6, 2014, 13:37:37.2841.
+Read more at http://katlas.org/wiki/KnotTheory.
+
+Clear[MyDiag]
+
+MyDiag = PD[X[5, 2, 7, 1], X[2, 6, 3, 5], X[5, 8, 4, 7], X[8, 3, 1, 4]]
+
+PD[X[5, 2, 7, 1], X[2, 6, 3, 5], X[5, 8, 4, 7], X[8, 3, 1, 4]]
+
+Reide1plus[K_PD, r_Integer] := {
+  ReInd[m_] := If[m > r, m + 2, m]; 
+  K /. {X[i_, j_, k_, l_] :> X[ReInd[i], ReInd[j], ReInd[k], ReInd[l]]}
+     K /. {X[i_, j_, k_, l_] /; k - i == 3 :> X[i + 2, j, k, l]} 
+  }
+
+Reide1plus[MyD, 3]
+
+ReplaceAll::reps: {PD[X[5,2,7,1],X[2,6,3,5],X[5,8,4,7],X[8,3,1,4]] (X[i_,j_,k_,l_]:>X[ReInd[i],ReInd[j],ReInd[k],ReInd[l]])} is neither a list of replacement rules nor a valid dispatch table, and so cannot be used for replacing. >>
+
+{PD[X[5, 2, 7, 1], X[2, 6, 3, 5], X[5, 8, 4, 7], 
+   X[8, 3, 1, 
+    4]] /. {PD[X[5, 2, 7, 1], X[2, 6, 3, 5], X[5, 8, 4, 7], 
+     X[8, 3, 1, 4]] (X[i_, j_, k_, l_] :> 
+      X[ReInd[i], ReInd[j], ReInd[k], ReInd[l]])}}

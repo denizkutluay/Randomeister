@@ -24,7 +24,9 @@ R1Type[r_Integer, t_Integer] := Switch[t, 1, X[r + 1, r + 1, r + 2, r], 2, X[r, 
 
 Reide1onFig8[K_PD, r_Integer, t_Integer] := Append[
   K /. Fig8SpecialCase[r], R1Type[r, t]
-  ]; Reide1plusGeneric[K_PD, r_Integer, t_Integer] := 
+  ]; 
+
+Reide1plusGeneric[K_PD, r_Integer, t_Integer] := 
  Append[K /. {X[i_, j_, k_, l_] -> 
            X[Upby2[i, r], Upby2[j, r], Upby2[k, r], Upby2[l, r]]}
         /. {X[r, j_, r + 3, l_] -> X[r + 2, j, r + 3, l]}
@@ -47,8 +49,7 @@ Reide1minusOnArc1[K_PD] := DeleteCases[K, crs_ /;
          crs == X[1, 1, 2, MaxArc[K]] || 
           crs == X[MaxArc[K], 1, 1, 2] || 
           crs == X[1, MaxArc[K], 2, 1] || crs == X[MaxArc[K], 2, 1, 1]
-        ] /. {X[i_, j_, k_, l_] -> 
-         X[i - 1, j - 1, k - 1, l - 1]} /. {X[MaxArc[K] - 1, j_, k_, 
+        ] /. {X[i_, j_, k_, l_] -> X[i - 1, j - 1, k - 1, l - 1]} /. {X[MaxArc[K] - 1, j_, k_, 
          l_] -> X[1, j, k, l]} /. {X[i_, MaxArc[K] - 1, k_, l_] -> 
        X[i, 1, k, l]} /. {X[i_, j_, MaxArc[K] - 1, l_] -> 
       X[i, j, 1, l]} /. {X[i_, j_, k_, MaxArc[K] - 1] -> 

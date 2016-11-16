@@ -1,8 +1,5 @@
 << KnotTheory`;
 
-Loading KnotTheory` version of September 6, 2014, 13:37:37.2841.
-Read more at http://katlas.org/wiki/KnotTheory.
-
 MyPD = PD[X[6, 2, 7, 1], X[2, 6, 3, 5], X[4, 7, 5, 8], X[8, 3, 1, 4]];
 
 Upby2[m_, r_Integer] := If[m > r, m + 2, m];

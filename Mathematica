@@ -1,26 +1,72 @@
-<< KnotTheory`;
+In[1]:= << KnotTheory`;
 
-Loading KnotTheory` version of September 6, 2014, 13:37:37.2841.
+During evaluation of In[1]:= Loading KnotTheory` version of September 6, 2014, 13:37:37.2841.
 Read more at http://katlas.org/wiki/KnotTheory.
 
-Clear[MyDiag]
+In[2]:= MyPD = 
+  PD[X[6, 2, 7, 1], X[2, 6, 3, 5], X[4, 7, 5, 8], X[8, 3, 1, 4]];
 
-MyDiag = PD[X[5, 2, 7, 1], X[2, 6, 3, 5], X[5, 8, 4, 7], X[8, 3, 1, 4]]
+In[3]:= Upby2[m_, r_Integer] := If[m > r, m + 2, m];
+Downby2[m_, r_Integer] := If[m > r, m - 2, m];
+MaxArc[K_PD] := 
+ 2*Length[K]; Fig8PDs = {PD[X[1, 1, 2, 2]], PD[X[2, 1, 1, 2]], 
+  PD[X[2, 2, 1, 1]], PD[X[1, 2, 2, 1]]}; 
+Fig8Q[K_PD] := MemberQ[Fig8PDs, K]; 
+Fig8SpecialCase[r_Integer] := If[r == 1,
+  {X[1, 1, 2, 2] -> X[3, 1, 4, 4], X[2, 1, 1, 2] -> X[4, 3, 1, 4], 
+   X[2, 2, 1, 1] -> X[2, 2, 1, 3], X[1, 2, 2, 1] -> X[3, 4, 4, 1]},
+  {X[1, 1, 2, 2] -> X[1, 1, 2, 4], X[2, 1, 1, 2] -> X[4, 1, 1, 2],
+   X[2, 2, 1, 1] -> X[4, 2, 1, 1], X[1, 2, 2, 1] -> X[1, 4, 2, 1]}
+  ]; R1Type[r_Integer, t_Integer] := 
+ Switch[t, 1, X[r + 1, r + 1, r + 2, r], 2, X[r, r + 1, r + 1, r + 2],
+   3, X[r + 1, r, r + 2, r + 1], 4, X[r, r + 2, r + 1, r + 1]]; 
+Reide1onFig8[K_PD, r_Integer, t_Integer] := Append[
+  K /. Fig8SpecialCase[r], R1Type[r, t]
+  ]; Reide1plusGeneric[K_PD, r_Integer, t_Integer] := 
+ Append[K /. {X[i_, j_, k_, l_] -> 
+           X[Upby2[i, r], Upby2[j, r], Upby2[k, r], Upby2[l, r]]}
+        /. {X[r, j_, r + 3, l_] -> X[r + 2, j, r + 3, l]}
+       /. {X[i_, r, k_, r + 3] -> X[i, r + 2, k, r + 3]}
+      /. {X[i_, r + 3, k_, r] -> X[i, r + 3, k, r + 2]}
+     /. {X[i_, MaxArc[K], k_, 1] -> X[i, MaxArc[K] + 2, k, 1]}
+    /. {X[MaxArc[K], j_, 1, l_] -> X[MaxArc[K] + 2, j, 1, l]}
+   /. {X[i_, 1, k_, MaxArc[K]] -> X[i, 1, k, MaxArc[K] + 2]}
+  , R1Type[r, t]]; 
+R1p[K_PD, r_Integer, t_Integer] := 
+ If[Fig8Q[K], Reide1onFig8[K, r, t], Reide1plusGeneric[K, r, t]];
 
-PD[X[5, 2, 7, 1], X[2, 6, 3, 5], X[5, 8, 4, 7], X[8, 3, 1, 4]]
+In[6]:= Reide1minusGeneric[K_PD, r_Integer] := DeleteCases[K, crs_ /; 
+    crs == X[r, r, r + 1, r - 1] || crs == X[r - 1, r, r, r + 1] ||
+     crs == X[r, r - 1, r + 1, r] || crs == X[r - 1, r + 1, r, r]
+   ] /. {X[i_, j_, k_, l_] -> 
+    X[Downby2[i, r], Downby2[j, r], Downby2[k, r], Downby2[l, r]]}
 
-Reide1plus[K_PD, r_Integer] := {
-  ReInd[m_] := If[m > r, m + 2, m]; 
-  K /. {X[i_, j_, k_, l_] :> X[ReInd[i], ReInd[j], ReInd[k], ReInd[l]]}
-     K /. {X[i_, j_, k_, l_] /; k - i == 3 :> X[i + 2, j, k, l]} 
-  }
+In[7]:= Reide1minusGeneric[R1p[MyPD, 2, 1], 3]
 
-Reide1plus[MyD, 3]
+Out[7]= PD[X[6, 2, 7, 1], X[2, 6, 3, 5], X[4, 7, 5, 8], X[8, 3, 1, 4]]
 
-ReplaceAll::reps: {PD[X[5,2,7,1],X[2,6,3,5],X[5,8,4,7],X[8,3,1,4]] (X[i_,j_,k_,l_]:>X[ReInd[i],ReInd[j],ReInd[k],ReInd[l]])} is neither a list of replacement rules nor a valid dispatch table, and so cannot be used for replacing. >>
+In[8]:= Reide1minusOnArc1[K_PD] := DeleteCases[K, crs_ /;
+        crs == X[1, 1, 2, MaxArc[K]] || crs == X[MaxArc[K], 1, 1, 2] ||
+          crs == X[1, MaxArc[K], 2, 1] || crs == X[MaxArc[K], 2, 1, 1]
+       ] /. {X[i_, j_, k_, l_] -> 
+        X[i - 1, j - 1, k - 1, l - 1]} /. {X[MaxArc[K] - 1, j_, k_, 
+        l_] -> X[1, j, k, l]} /. {X[i_, MaxArc[K] - 1, k_, l_] -> 
+      X[i, 1, k, l]} /. {X[i_, j_, MaxArc[K] - 1, l_] -> 
+     X[i, j, 1, l]} /. {X[i_, j_, k_, MaxArc[K] - 1] -> X[i, j, k, 1]}
 
-{PD[X[5, 2, 7, 1], X[2, 6, 3, 5], X[5, 8, 4, 7], 
-   X[8, 3, 1, 
-    4]] /. {PD[X[5, 2, 7, 1], X[2, 6, 3, 5], X[5, 8, 4, 7], 
-     X[8, 3, 1, 4]] (X[i_, j_, k_, l_] :> 
-      X[ReInd[i], ReInd[j], ReInd[k], ReInd[l]])}}
+In[9]:= Reide1minusOnArc1[
+ PD[X[7, 3, 8, 2], X[3, 7, 4, 6], X[5, 8, 6, 9], X[9, 4, 10, 5], 
+  X[1, 1, 2, 10]]]
+
+R1p[MyPD, 2, 1]
+
+Reide1minusOnMaxArc[K_PD] := DeleteCases[K, crs_ /;
+        crs == X[1, 1, 2, MaxArc[K]] || crs == X[MaxArc[K], 1, 1, 2] ||
+          crs == X[1, MaxArc[K], 2, 1] || crs == X[MaxArc[K], 2, 1, 1]
+       ] /. {X[i_, j_, k_, l_] -> 
+        X[i - 1, j - 1, k - 1, l - 1]} /. {X[MaxArc[K] - 1, j_, k_, 
+        l_] -> X[1, j, k, l]} /. {X[i_, MaxArc[K] - 1, k_, l_] -> 
+      X[i, 1, k, l]} /. {X[i_, j_, MaxArc[K] - 1, l_] -> 
+     X[i, j, 1, l]} /. {X[i_, j_, k_, MaxArc[K] - 1] -> X[i, j, k, 1]}
+
+Out[12]= $Aborted

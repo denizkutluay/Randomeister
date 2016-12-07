@@ -68,3 +68,87 @@ Reide1minusOnMaxArc[K_PD] := DeleteCases[K, crs_ /;
 
 R1m[K_PD, r_Integer] := If[r != 1 && r != MaxArc[K], Reide1minusGeneric[K, r], 
   If[r == 1, Reide1minusOnArc1[K], Reide1minusOnMaxArc[K]]];
+
+HasQ[m_][X[i_, j_, k_, l_]] := 
+  If[m == i || m == j || m == k || m == l, True, False];
+
+FindCrossingsWith[K_PD, m_Integer] := Select[K, HasQ[m]];
+
+EdgeReindexing[m_Integer] := If[m > 0, 2 m - 1, -2 m];
+
+Friend[K_PD, a_Integer, b_Integer] := 
+ Module[{m = K[[a, b]], l = FindCrossingsWith[K, K[[a, b]]]},
+  If[Length[l] == 1,
+   {a, If[Position[K[[a]], m][[1, 1]] == b, 
+     Position[K[[a]], m][[2, 1]], Position[K[[a]], m][[1, 1]]]},
+   If[l[[1]] === K[[a]],
+    {Position[K, l[[2]]][[1, 1]], Position[l[[2]], m][[1, 1]]},
+    {Position[K, l[[1]]][[1, 1]], Position[l[[1]], m][[1, 1]]}
+    ]
+   ]
+  ]
+
+AddEdge[X[i_, j_, k_, l_], b_Integer] := 
+ Module[{m = X[i, j, k, l][[b]]},
+  Switch[b, 1, -m, 2, If[l - j == 1 || j - l > 1, -m, m], 3, m, 4, 
+   If[l - j == 1 || j - l > 1, m, -m]]
+  ]
+
+GetFace[K_PD, a_Integer, b_Integer] := 
+ Module[{MyFace = {AddEdge[K[[a]], b]}, n, DummyX = K[[a]], A = a, 
+   B = b},
+  {A, B} = Friend[K, A, Mod[B + 1, 4, 1]];
+  DummyX = K[[A]];
+  n = K[[A, B]];
+  Join[MyFace,
+   Flatten[Reap[
+      While[n != K[[a, b]],
+       Sow[AddEdge[DummyX, B]];
+       {A, B} = Friend[K, A, Mod[B + 1, 4, 1]];
+       DummyX = K[[A]];
+       n = K[[A, B]];
+       ]
+      ][[2]]
+    ]
+   ]
+  ]
+
+FindArc[K_PD, m_Integer] :=
+ Module[{L = Length[FindCrossingsWith[K, m]], 
+   X1 = FindCrossingsWith[K, m][[1]]},
+  Switch[L,
+   1, {{Position[K, X1][[1, 1]], Position[X1, m][[1, 1]]},
+    {Position[K, X1][[1, 1]], Position[X1, m][[2, 1]]}},
+   2, {{Position[K, X1][[1, 1]], Position[X1, m][[1, 1]]},
+    {Position[K, FindCrossingsWith[K, m][[2]]][[1, 1]], 
+     Position[FindCrossingsWith[K, m][[2]], m][[1, 1]]}}
+   ]
+  ]
+
+Fig8Faces[K_PD] := 
+  If[K[[1]] === X[1, 1, 2, 2] || 
+    K[[1]] === X[2, 1, 1, 2], {{-1}, {1, -2}, {2}}, {{1}, {-1, 
+     2}, {-2}}];
+
+Faces[K_PD] := If[Fig8Q[K], Fig8Faces[K],
+  Module[{EdgeV = ConstantArray[0, 2*MaxArc[K]], Halfway},
+    Reap[
+     For[i = 1, i <= MaxArc[K], i++,
+      Module[{DummyF1 = 
+         GetFace[K, FindArc[K, i][[1, 1]], FindArc[K, i][[1, 2]] ],
+        DummyF2 = 
+         GetFace[K, FindArc[K, i][[2, 1]], FindArc[K, i][[2, 2]] ]},
+       If[MemberQ[ EdgeV[[ Map[ EdgeReindexing, DummyF1 ] ]], 1], 
+        Goto[Halfway], Sow[DummyF1];
+        EdgeV[[Map[ EdgeReindexing, DummyF1 ]]] += 1;
+        ];
+       Label[Halfway];
+       If[MemberQ[ EdgeV[[ Map[ EdgeReindexing, DummyF2 ] ]], 1], 
+        Continue[], Sow[DummyF2];
+        EdgeV[[Map[ EdgeReindexing, DummyF2 ]]] += 1;
+        ];
+       ]
+      ]
+     ]
+    ][[2, 1]]
+  ]

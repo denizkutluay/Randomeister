@@ -153,7 +153,8 @@ Faces[K_PD] := If[Fig8Q[K], Fig8Faces[K],
     ][[2, 1]]
   ]
 
-ExtraXings[a_Integer, b_Integer] := Module[{A = Abs[a], B = Abs[b]},
+ExtraXingsType1[a_Integer, b_Integer] := 
+ Module[{A = Abs[a], B = Abs[b]},
   Switch[{Sign[a], Sign[b]},
    {1, 1}, 
    PD[X[B + 3, A + 1, B + 4, A], X[B + 2, A + 1, B + 3, A + 2]],
@@ -166,26 +167,45 @@ ExtraXings[a_Integer, b_Integer] := Module[{A = Abs[a], B = Abs[b]},
    ]
   ]
 
+ExtraXingsType2[a_Integer, b_Integer] := 
+ Module[{A = Abs[a], B = Abs[b]},
+  Switch[{Sign[a], Sign[b]},
+   {1, 1}, 
+   PD[X[A, B + 3, A + 1, B + 4], X[A + 1, B + 3, A + 2, B + 2]],
+   {1, -1}, 
+   PD[X[A, B + 3, A + 1, B + 2], X[A + 1, B + 3, A + 2, B + 4]],
+   {-1, 1}, 
+   PD[X[A + 1, B + 4, A + 2, B + 3], X[A, B + 2, A + 1, B + 3]],
+   {-1, -1}, 
+   PD[X[A + 1, B + 2, A + 2, B + 3], X[A, B + 4, A + 1, B + 3]]
+   ]
+  ]
+
+ExtraXings[a_Integer, b_Integer, t_Integer] := 
+  If[t == 2, ExtraXingsType2[a, b], ExtraXingsType1[a, b]];
+
 ReNumberR2p[m_Integer, a_Integer, b_Integer] := 
-  If[Abs[b] < m, m + 4, If[Abs[a] < m <= Abs[b], m + 2, m]];
+  If[Abs[b] < m, m + 4, If[Abs[a] <= m <= Abs[b], m + 2, m]];
 
 R2pShifts[K_PD, a_Integer, b_Integer] := 
   Map[Function[x, ReNumberR2p[x, a, b]], K, {2}];
 
 R2pXFixes[K_PD, a_Integer, b_Integer] := 
  Module[{A = Abs[a], B = Abs[b], MaxArc = MaxArc[K]}, 
-  K /. {X[A, j_, A + 3, l_] -> X[A + 2, j, A + 3, l]} /. {X[i_, A, k_,
-              A + 3] -> X[i, A + 2, k, A + 3]} /. {X[i_, A + 3, k_, 
-            A] -> X[i, A + 3, k, A + 2]}
-        /. {X[B + 2, j_, B + 5, l_] -> X[B + 4, j, B + 5, l]} /. {X[
-          i_, B + 2, k_, B + 5] -> 
-         X[i, B + 4, k, B + 5]} /. {X[i_, B + 5, k_, B + 2] -> 
-         X[i, B + 5, k, B + 4]}
+  K /. {X[A - 1, j_, A + 2, l_] -> X[A - 1, j, A, l]} /. {X[i_, A - 1,
+                 k_, A + 2] -> X[i, A - 1, k, A]} /. {X[i_, A - 1, k_,
+                A + 2] -> X[i, A - 1, k, A]}
+           /. {X[B + 2, j_, B + 5, l_] -> 
+             X[B + 4, j, B + 5, l]} /. {X[i_, B + 2, k_, B + 5] -> 
+            X[i, B + 4, k, B + 5]} /. {X[i_, B + 5, k_, B + 2] -> 
+           X[i, B + 5, k, B + 4]}
         /. {X[MaxArc + 2, j_, 1, l_] -> X[MaxArc + 4, j, 1, l]} /. {X[
-       i_, MaxArc + 2, k_, 1] -> X[i, MaxArc + 4, k, 1]} /. {X[i_, 1, 
-      k_, MaxArc + 2] -> X[i, 1, k, MaxArc + 4]}
+          i_, MaxArc + 2, k_, 1] -> X[i, MaxArc + 4, k, 1]} /. {X[i_, 
+         1, k_, MaxArc + 2] -> X[i, 1, k, MaxArc + 4]}
+     /. {X[MaxArc + 4, j_, 3, l_] -> X[MaxArc + 4, j, 1, l]} /. {X[i_,
+        MaxArc + 4, k_, 3] -> X[i, MaxArc + 4, k, 1]} /. {X[i_, 3, k_,
+       MaxArc + 4] -> X[i, 1, k, MaxArc + 4]}
   ]
 
 R2pGeneric[K_PD, a_Integer, b_Integer, t_Integer] := 
-  Join[R2pXFixes[R2pShifts[K, a, b], a, b], ExtraXings[a, b]];
-  
+  Join[R2pXFixes[R2pShifts[K, a, b], a, b], ExtraXings[a, b, t]];

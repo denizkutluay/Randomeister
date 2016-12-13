@@ -86,13 +86,13 @@ Friend[K_PD, a_Integer, b_Integer] :=
     {Position[K, l[[1]]][[1, 1]], Position[l[[1]], m][[1, 1]]}
     ]
    ]
-  ]
+  ];
 
 AddEdge[X[i_, j_, k_, l_], b_Integer] := 
  Module[{m = X[i, j, k, l][[b]]},
   Switch[b, 1, -m, 2, If[l - j == 1 || j - l > 1, -m, m], 3, m, 4, 
    If[l - j == 1 || j - l > 1, m, -m]]
-  ]
+  ];
 
 GetFace[K_PD, a_Integer, b_Integer] := 
  Module[{MyFace = {AddEdge[K[[a]], b]}, n, DummyX = K[[a]], A = a, 
@@ -111,7 +111,7 @@ GetFace[K_PD, a_Integer, b_Integer] :=
       ][[2]]
     ]
    ]
-  ]
+  ];
 
 FindArc[K_PD, m_Integer] :=
  Module[{L = Length[FindCrossingsWith[K, m]], 
@@ -123,7 +123,7 @@ FindArc[K_PD, m_Integer] :=
     {Position[K, FindCrossingsWith[K, m][[2]]][[1, 1]], 
      Position[FindCrossingsWith[K, m][[2]], m][[1, 1]]}}
    ]
-  ]
+  ];
 
 Fig8Faces[K_PD] := 
   If[K[[1]] === X[1, 1, 2, 2] || 
@@ -151,7 +151,7 @@ Faces[K_PD] := If[Fig8Q[K], Fig8Faces[K],
       ]
      ]
     ][[2, 1]]
-  ]
+  ];
 
 ExtraXingsType1[a_Integer, b_Integer] := 
  Module[{A = Abs[a], B = Abs[b]},
@@ -165,7 +165,7 @@ ExtraXingsType1[a_Integer, b_Integer] :=
    {-1, -1}, 
    PD[X[B + 2, A + 2, B + 3, A + 1], X[B + 3, A, B + 4, A + 1]]
    ]
-  ]
+  ];
 
 ExtraXingsType2[a_Integer, b_Integer] := 
  Module[{A = Abs[a], B = Abs[b]},
@@ -179,7 +179,7 @@ ExtraXingsType2[a_Integer, b_Integer] :=
    {-1, -1}, 
    PD[X[A + 1, B + 2, A + 2, B + 3], X[A, B + 4, A + 1, B + 3]]
    ]
-  ]
+  ];
 
 ExtraXings[a_Integer, b_Integer, t_Integer] := 
   If[t == 2, ExtraXingsType2[a, b], ExtraXingsType1[a, b]];
@@ -205,7 +205,7 @@ R2pXFixes[K_PD, a_Integer, b_Integer] :=
      /. {X[MaxArc + 4, j_, 3, l_] -> X[MaxArc + 4, j, 1, l]} /. {X[i_,
         MaxArc + 4, k_, 3] -> X[i, MaxArc + 4, k, 1]} /. {X[i_, 3, k_,
        MaxArc + 4] -> X[i, 1, k, MaxArc + 4]}
-  ]
+  ];
 
 R2pGeneric[K_PD, a_Integer, b_Integer, t_Integer] := 
   Join[R2pXFixes[R2pShifts[K, a, b], a, b], ExtraXings[a, b, t]];
